@@ -32,7 +32,7 @@ def Ts_cal(f10,f11,f4,f5,fc):
     r=0.984
     I_hc = np.zeros((rows, cols))
     ts=T10+c1*(T10-T11)+c2*(T10-T11)*(T10-T11)+c0+(c3+c4*wv)*(1-((epsilon1+epsilon2)/2))+(c5+c6*wv)*(epsilon1-epsilon2) #地表温度
-    wv = np.log((wv + 0.1107) / 0.2103 / 0.6108) * (237.3 + ts - 274.15) / (17.27 * (ts - 274.15)) 
+    wv = np.log((wv + 0.1107) / 0.2103 / 0.6108) * (237.3 + ts - 273.15) / (17.27 * (ts - 273.15)) 
     itertools.product(range(0,rows),range(0,cols))
     for item in itertools.product(range(0,rows),range(0,cols)):
         i=item[0]
