@@ -117,7 +117,8 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MyMainForm, self).__init__(parent)
         self.setupUi(self)
-        self.pushButton.clicked.connect(self.calResults)
+        
+        self.pushButton.clicked.connect(self.button_start)
         self.pushButton_2.clicked.connect(QCoreApplication.instance().quit)
         self.pushButton_3.clicked.connect(self.openFolder)
         self.pushButton_4.clicked.connect(self.openFile)
@@ -132,7 +133,19 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         self.lineEdit_4.setText("")
         self.lineEdit_5.setText("")
         self.textEdit.setText("欢迎使用, 选择对应波段Landsat8和地表分类图，点击确定即可运行\n出品：热红外2组")
-
+    
+    def button_start(self):
+        self.pushButton.setChecked(True)
+        self.pushButton.setDisabled(True)
+        self.th = MyThread(fc=self.lineEdit.text(),f10=self.lineEdit_2.text(),f11=self.lineEdit_3.text(),f4=self.lineEdit_4.text(),f5=self.lineEdit_5.text())
+        #self.th.finishSignal.connect(self.button_finish)
+        self.th.start()
+        #self.th.finishSignal.connect(self.button_finish)
+    
+    def button_finish(self):
+        self.pushButton.setChecked(False)
+        self.pushButton.setDisabled(False)
+        
     def openFile(self):
         filename, ok = QFileDialog.getOpenFileName(self, "选取文件", r"./", "All Files(*)")
         if ok:
@@ -170,6 +183,37 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         path = os.path.abspath('.')
         pathfolder = path + os.sep + "datas"
         os.system('explorer.exe /n, %s' % pathfolder)
+
+        self.pushButton.setChecked(False)
+        self.pushButton.setDisabled(False)
+
+    def calResults(self):
+        fc = self.lineEdit.text()
+        f10 = self.lineEdit_2.text()
+        f11 = self.lineEdit_3.text()
+        f4 = self.lineEdit_4.text()
+        f5 = self.lineEdit_5.text()
+        ts, wv = Ts.Ts_cal(f10, f11, f4, f5, fc)
+        I_hc = calRes.Index_1(ts, wv)
+        colormaps.test_gray2color()
+        self.textEdit.setText(self, "运行完毕")
+
+class MyThread(QThread):
+    sec_changed_signed = pyqtSignal(str)
+
+    def __init__(self, fc, f10, f11, f4, f5, parent=None):
+        super().__init__(parent=parent)
+        self.fc = fc
+        self.f10 = f10
+        self.f11 = f11
+        self.f4 = f4
+        self.f5 = f5
+
+    def run(self):
+        ts, wv = Ts.Ts_cal(self.f10, self.f11, self.f4, self.f5, self.fc)
+        I_hc = calRes.Index_1(ts, wv)
+        colormaps.test_gray2color()
+        self.textEdit.setText(self, "运行完毕")
 
     def calResults(self):
         fc = self.lineEdit.text()
